@@ -2,7 +2,6 @@ import AOT from "./assets/aot_logo.png";
 import Background from "./assets/background.png";
 
 export default function Card({ card, onClick }) {
-  // card: { id, value, isFlipped, isMatched }
   const showFront = card.isFlipped || card.isMatched;
 
   return (
@@ -16,7 +15,6 @@ export default function Card({ card, onClick }) {
       }}
     >
       <div className={`card-inner ${showFront ? "is-flipped" : ""}`}>
-        {/* Front: revealed face (value) */}
         <div className="card-face card-front flex items-center justify-center rounded-2xl bg-white text-black font-bold shadow-md">
           <div className="card-value">{card.value}</div>
         </div>

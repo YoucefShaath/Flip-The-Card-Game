@@ -23,18 +23,16 @@ export default function App() {
   const [secondId, setSecondId] = useState(null);
   const [locked, setLocked] = useState(false);
   const [matches, setMatches] = useState(0);
-  const [phase, setPhase] = useState("countdown"); // 'countdown' | 'preview' | 'playing' | 'won' | 'lost'
+  const [phase, setPhase] = useState("countdown"); 
   const [countdown, setCountdown] = useState(3);
-  const [timer, setTimer] = useState(0); // elapsed seconds during 'playing'
+  const [timer, setTimer] = useState(0); 
 
   useEffect(() => {
-    // create new deck on mount and start the countdown
     setDeck(createShuffledDeck());
     setPhase("countdown");
     setCountdown(3);
   }, []);
 
-  // countdown (3s) before preview
   useEffect(() => {
     if (phase !== "countdown") return;
     setCountdown(3);
@@ -51,13 +49,11 @@ export default function App() {
     return () => clearInterval(iv);
   }, [phase]);
 
-  // preview phase: show all cards face-up for 10s, then flip and start playing
   useEffect(() => {
     if (phase !== "preview") return;
     // reveal all
     setDeck((d) => d.map((c) => ({ ...c, isFlipped: true })));
     const t = setTimeout(() => {
-      // hide non-matched cards and start the game
       setDeck((d) =>
         d.map((c) =>
           c.isMatched ? { ...c, isFlipped: true } : { ...c, isFlipped: false }
@@ -68,24 +64,21 @@ export default function App() {
     return () => clearTimeout(t);
   }, [phase]);
 
-  // timer: increment every second when phase is 'playing'
   useEffect(() => {
     if (phase !== "playing") return;
-    setTimer(0); // reset timer when entering playing phase
+    setTimer(0); 
     const iv = setInterval(() => {
       setTimer((t) => t + 1);
     }, 1000);
     return () => clearInterval(iv);
   }, [phase]);
 
-  // check for win condition
   useEffect(() => {
     if (matches === 15 && phase === "playing") {
       setPhase("won");
     }
   }, [matches, phase]);
 
-  // check for lose condition
   useEffect(() => {
     if (timer > 100 && phase === "playing") {
       setPhase("lost");
@@ -101,7 +94,6 @@ export default function App() {
       setLocked(true);
 
       if (first.value === second.value) {
-        // mark only these two specific cards as matched
         setDeck((d) =>
           d.map((c) =>
             c.id === firstId || c.id === secondId
@@ -110,14 +102,12 @@ export default function App() {
           )
         );
         setMatches((n) => n + 1);
-        // small delay so user sees the second card
         setTimeout(() => {
           setFirstId(null);
           setSecondId(null);
           setLocked(false);
         }, 400);
       } else {
-        // not a match: flip back after short delay
         setTimeout(() => {
           setDeck((d) =>
             d.map((c) =>
@@ -136,11 +126,10 @@ export default function App() {
 
   function handleCardClick(cardId) {
     if (locked) return;
-    if (phase !== "playing") return; // disable clicks until playing
+    if (phase !== "playing") return; 
     const card = deck.find((c) => c.id === cardId);
     if (!card || card.isFlipped || card.isMatched) return;
 
-    // flip the clicked card
     setDeck((d) =>
       d.map((c) => (c.id === cardId ? { ...c, isFlipped: true } : c))
     );
@@ -151,7 +140,6 @@ export default function App() {
     }
 
     if (firstId && !secondId) {
-      // clicking the same card twice is ignored
       if (firstId === cardId) return;
       setSecondId(cardId);
       return;
@@ -165,7 +153,6 @@ export default function App() {
     setLocked(false);
     setMatches(0);
     setTimer(0);
-    // restart sequence
     setPhase("countdown");
     setCountdown(3);
   }
