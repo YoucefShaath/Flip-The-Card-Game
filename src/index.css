@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Flip card small utilities */
 .perspective {
   perspective: 800px;
 }
@@ -31,30 +30,16 @@
   transform: rotateY(0deg);
 }
 
-/* small responsive sizing hints (the rest is handled by Tailwind) */
 
-/* Make the card fill its grid column while keeping an aspect ratio */
 .card-outer {
-  width: 100%;
-}
-.card-aspect {
-  /* 1.4 aspect ratio: height = width * 1.4 -> padding-top: 140% */
-  width: 100%;
-  padding-top: 140%;
-}
-.card-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  display: inline-block;
 }
 .card-value {
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 .card-logo {
-  width: 40%;
-  height: 40%;
+  width: 6rem;
+  height: 6rem;
   padding: 0.5rem;
 }
 .card-logo-img {

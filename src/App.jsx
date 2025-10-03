@@ -2,15 +2,13 @@ import { useEffect, useState } from "react";
 import Card from "./Card";
 
 function createShuffledDeck() {
-  // create 10 pair values (1..10) => 20 cards total for a 10x2 grid
-  const totalPairs = 10;
+  const totalPairs = 15;
   const values = Array.from({ length: totalPairs }, (_, i) => i + 1);
   const pairs = values.flatMap((v) => [
     { id: `${v}-a`, value: v },
     { id: `${v}-b`, value: v },
   ]);
 
-  // Fisher-Yates shuffle
   for (let i = pairs.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
@@ -24,13 +22,68 @@ export default function App() {
   const [firstId, setFirstId] = useState(null);
   const [secondId, setSecondId] = useState(null);
   const [locked, setLocked] = useState(false);
-  const [moves, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
+  const [phase, setPhase] = useState("countdown"); 
+  const [countdown, setCountdown] = useState(3);
+  const [timer, setTimer] = useState(0); 
 
   useEffect(() => {
-    // create new deck on mount
     setDeck(createShuffledDeck());
+    setPhase("countdown");
+    setCountdown(3);
   }, []);
+
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    setCountdown(3);
+    let iv = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(iv);
+          setPhase("preview");
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "preview") return;
+    // reveal all
+    setDeck((d) => d.map((c) => ({ ...c, isFlipped: true })));
+    const t = setTimeout(() => {
+      setDeck((d) =>
+        d.map((c) =>
+          c.isMatched ? { ...c, isFlipped: true } : { ...c, isFlipped: false }
+        )
+      );
+      setPhase("playing");
+    }, 5000);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+    setTimer(0); 
+    const iv = setInterval(() => {
+      setTimer((t) => t + 1);
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [phase]);
+
+  useEffect(() => {
+    if (matches === 15 && phase === "playing") {
+      setPhase("won");
+    }
+  }, [matches, phase]);
+
+  useEffect(() => {
+    if (timer > 100 && phase === "playing") {
+      setPhase("lost");
+    }
+  }, [timer, phase]);
 
   useEffect(() => {
     if (firstId && secondId) {
@@ -39,24 +92,22 @@ export default function App() {
       if (!first || !second) return;
 
       setLocked(true);
-      setMoves((m) => m + 1);
 
       if (first.value === second.value) {
-        // mark matched
         setDeck((d) =>
           d.map((c) =>
-            c.value === first.value ? { ...c, isMatched: true } : c
+            c.id === firstId || c.id === secondId
+              ? { ...c, isMatched: true }
+              : c
           )
         );
-        setMatches((m) => m + 1);
-        // small delay so user sees the second card
+        setMatches((n) => n + 1);
         setTimeout(() => {
           setFirstId(null);
           setSecondId(null);
           setLocked(false);
         }, 400);
       } else {
-        // not a match: flip back after short delay
         setTimeout(() => {
           setDeck((d) =>
             d.map((c) =>
@@ -71,14 +122,14 @@ export default function App() {
         }, 800);
       }
     }
-  }, [firstId, secondId, deck]);
+  }, [firstId, secondId]);
 
   function handleCardClick(cardId) {
     if (locked) return;
+    if (phase !== "playing") return; 
     const card = deck.find((c) => c.id === cardId);
     if (!card || card.isFlipped || card.isMatched) return;
 
-    // flip the clicked card
     setDeck((d) =>
       d.map((c) => (c.id === cardId ? { ...c, isFlipped: true } : c))
     );
@@ -89,7 +140,6 @@ export default function App() {
     }
 
     if (firstId && !secondId) {
-      // clicking the same card twice is ignored
       if (firstId === cardId) return;
       setSecondId(cardId);
       return;
@@ -101,29 +151,17 @@ export default function App() {
     setFirstId(null);
     setSecondId(null);
     setLocked(false);
-    setMoves(0);
     setMatches(0);
+    setTimer(0);
+    setPhase("countdown");
+    setCountdown(3);
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="w-full px-4">
-        <header className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Flip Card — 10x2 Grid</h1>
-          <div className="space-x-4">
-            <span>Moves: {moves}</span>
-            <span>Matches: {matches} / 10</span>
-            <button
-              onClick={resetGame}
-              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded"
-            >
-              Reset
-            </button>
-          </div>
-        </header>
-
-        <main>
-          <div className="grid grid-cols-10 grid-rows-2 gap-3 w-full">
+    <div className="min-h-screen bg-[#37353E] text-white py-6">
+      <div className="w-full px-2">
+        <main className="relative">
+          <div className="grid grid-cols-10 grid-rows-3 gap-y-4 w-full">
             {deck.map((card) => (
               <Card
                 key={card.id}
@@ -132,13 +170,59 @@ export default function App() {
               />
             ))}
           </div>
+
+          {phase === "countdown" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black bg-opacity-10" />
+              <div className="relative z-60 text-white text-6xl font-bold">
+                {countdown}
+              </div>
+            </div>
+          )}
+
+          {phase === "won" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="flex flex-col gap-4 absolute inset-0 bg-black bg-opacity-50" />
+              <div className="relative z-60 text-white text-6xl font-bold text-center">
+                You Won!
+                <br />
+                <button
+                  onClick={resetGame}
+                  className="bg-green-500 hover:bg-green-600 p-4 rounded-2xl w-48 h-auto font-semibold text-3xl"
+                >
+                  Play Again
+                </button>
+              </div>
+            </div>
+          )}
+
+          {phase === "lost" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="flex flex-col gap-4 absolute inset-0 bg-black bg-opacity-50" />
+              <div className="relative z-60 text-white text-6xl font-bold text-center">
+                Time's Up!
+                <br />
+                <button
+                  onClick={resetGame}
+                  className="bg-red-500 hover:bg-red-600 p-4 rounded-2xl w-48 h-auto font-semibold text-3xl"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
         </main>
+        <footer className="mt-4 flex justify-center items-center gap-6">
+          <div className="text-2xl font-semibold">Matches: {matches} / 15</div>
+          <button
+            onClick={resetGame}
+            className="bg-[#8E2426] hover:bg-red-600 px-3 py-1 rounded w-40 h-auto font-semibold text-3xl"
+          >
+            Reset
+          </button>
+          <div className="text-2xl font-semibold">Time: {timer}s</div>
+        </footer>
       </div>
-      {matches === 10 && (
-        <div className="mt-6 text-center text-green-400 font-semibold">
-          You won in {moves} moves! 🎉
-        </div>
-      )}
     </div>
   );
 }
