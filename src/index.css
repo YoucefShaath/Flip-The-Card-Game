@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Flip card small utilities */
+.perspective {
+  perspective: 800px;
+}
+.card-outer {
+  display: inline-block;
+}
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.45s;
+}
+.card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+.card-face {
+  backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+}
+.card-front {
+  transform: rotateY(180deg);
+}
+.card-back {
+  transform: rotateY(0deg);
+}
+
+/* small responsive sizing hints (the rest is handled by Tailwind) */
+
+/* Make the card fill its grid column while keeping an aspect ratio */
+.card-outer {
+  width: 100%;
+}
+.card-aspect {
+  /* 1.4 aspect ratio: height = width * 1.4 -> padding-top: 140% */
+  width: 100%;
+  padding-top: 140%;
+}
+.card-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.card-value {
+  font-size: 1.5rem;
+}
+.card-logo {
+  width: 40%;
+  height: 40%;
+  padding: 0.5rem;
+}
+.card-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
