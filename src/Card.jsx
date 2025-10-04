@@ -6,7 +6,7 @@ export default function Card({ card, onClick }) {
 
   return (
     <div
-      className={`card-outer w-32 h-48 perspective`}
+      className={`card-outer w-32 h-44 perspective`}
       onClick={onClick}
       role="button"
       tabIndex={0}
