@@ -19,7 +19,7 @@ function StartingPage({ onStart, show }) {
   if (!effectiveVisible) return null;
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-900 text-white absolute top-0 left-0 w-full z-50">
+    <div className="flex flex-col items-center min-h-screen h-full w-full bg-gray-900 text-white absolute top-0 left-0 w-full z-50">
       <div className="starting-page h-72 w-72 m-4">
         <img src={titleLogo} alt="Starting Page" />
       </div>
