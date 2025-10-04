@@ -15,8 +15,18 @@ export default function Card({ card, onClick }) {
       }}
     >
       <div className={`card-inner ${showFront ? "is-flipped" : ""}`}>
-        <div className="card-face card-front flex items-center justify-center rounded-2xl bg-white text-black font-bold shadow-md">
-          <div className="card-value">{card.value}</div>
+        <div className="card-face card-front flex items-center justify-center rounded-2xl bg-white text-black font-bold shadow-md overflow-hidden">
+          {card.value && card.value.src ? (
+            <img
+              src={card.value.src}
+              alt={card.value.id}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="card-value">
+              {typeof card.value === "object" ? card.value.id : card.value}
+            </div>
+          )}
         </div>
 
         <div className="card-face card-back flex items-center justify-center rounded-2xl shadow-lg bg-[#212121] overflow-hidden relative">
